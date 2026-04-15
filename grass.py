@@ -12,13 +12,19 @@ https://en.wikipedia.org/wiki/GRASS_(programming_language)
 grass_grammar = """
 ?start: (line | comment | _NL)+
 
-line: [label] command [";" command]* [comment]
+line: [label] command [";" command]* [comment] _NL
 
 label: "%" /[A-Z]+/
-command: commandname[modifier] [argument ["," argument]*]
+command: variable "=" expression
+         | commandname[modifier] [argument ["," argument]*]
+
 commandname: /[A-Z]+/
 modifier: "/" /[A-Z]/
 argument: /.+/
+
+pixname: /[A-Z0-9]+/
+variable: /[A-Z]{1,2}/ | "$" /[A-Z]/
+expression: /.+/
 
 comment: "*" /.+/
 
