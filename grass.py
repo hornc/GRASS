@@ -20,7 +20,7 @@ command: variable "=" expression
 
 commandname: /[A-Z]+/
 modifier: "/" /[A-Z]/
-argument: /.+/
+argument: /[A-Z0-9]+/ | STRING | expression
 
 pixname: /[A-Z0-9]+/
 variable: /[$A-Z]{1,2}/
@@ -70,7 +70,10 @@ def run_command(t):
         elif cmdname.startswith('INP'):
             v = input('?')
         elif cmdname == 'GETDSK':
-            mod = cmd.children[1].children[0]
+            mod = cmd.children[1]
+            if mod:
+                # /P means do not display yet, just load points
+                mod = mod.children[0]
             arg = cmd.children[2].children[0]
             print('GETDSK', mod, arg)
             p = Picture()

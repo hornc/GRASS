@@ -1,4 +1,4 @@
-*	*Test display and scale + move of a simple picture
-GETDSK/P ATMP
+*            *Test display, scale + move of a simple picture
+GETDSK ATMP  *GET POINTS AND DISPLAY IMMEDIATELY
 SCALE ATMP,D1
 MOVE ATMP,D2,D3,D4
