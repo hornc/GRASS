@@ -23,7 +23,7 @@ modifier: "/" /[A-Z]/
 argument: /.+/
 
 pixname: /[A-Z0-9]+/
-variable: /[A-Z]{1,2}/ | "$" /[A-Z]/
+variable: /[$A-Z]{1,2}/
 expression: /.+/
 
 comment: "*" /.+/
@@ -36,15 +36,42 @@ comment: "*" /.+/
 """
 
 
+def run_command(t):
+    label, cmd, a, b = t.children
+    assert cmd.data == 'command'
+    cmd_type = cmd.children[0]
+    if cmd_type.data == 'variable':
+        var, expr = cmd.children
+        print(f'  VAR: {var.children[0]} = {expr.children[0]}')
+    elif cmd_type.data == 'commandname':
+        cmdname = cmd.children[0].children[0]
+        arg = cmd.children[2].children[0]
+        # print('DEBUG', cmd.children)
+        if cmdname.startswith('PROM'):
+            print(arg.strip('" '))
+        elif cmdname.startswith('INP'):
+            v = input('?')
+        elif cmdname == 'GETDSK':
+            mod = cmd.children[1].children[0]
+            arg = cmd.children[2].children[0]
+            print('GETDSK', mod, arg)
+        else:
+            print(f'  CMD: {cmdname}')
+
 
 def main():
     sourcefile = sys.argv[1]
     with open(sourcefile, 'r') as f:
         source = f.read()
 
-    print(source)
     parser = Lark(grass_grammar)
-    print(parser.parse(source).pretty())
+    parse_tree = parser.parse(source)
+    print(parse_tree.pretty())
+
+    for command in parse_tree.children:
+        if command.data != 'comment':
+            run_command(command)
+
 
 if __name__ == '__main__':
     main()
