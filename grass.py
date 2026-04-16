@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import sys
+import matplotlib.pyplot as plt
+import numpy as np
 from lark import Lark
 
 
@@ -8,6 +10,7 @@ GRASS programming language experimental parser
 https://en.wikipedia.org/wiki/GRASS_(programming_language)
 
 """
+
 
 grass_grammar = """
 ?start: (line | comment | _NL)+
@@ -48,10 +51,19 @@ class Picture:
 
     def from_file(self, fname):
         # load points from file
-        with open(fname.strip(), 'r') as f:
+        self.name = fname.strip()
+        with open(self.name, 'r') as f:
             for row in f:
                 x, y, z = [int(v) for v in row.strip().split(',')]
                 self.points.append([x, y, z])
+
+    def show(self):
+        ax = plt.figure().add_subplot(projection='3d')
+        x, y, z = zip(*self.points)
+        ax.plot(x, z, y, label=self.name)
+        ax.set(xlabel='X', ylabel='Z', zlabel='Y')
+        ax.legend()
+        plt.show()
 
 
 def run_command(t):
@@ -79,6 +91,7 @@ def run_command(t):
             p = Picture()
             p.from_file(arg)
             print('POINTS:', p.points)
+            p.show()
         else:
             print(f'  CMD: {cmdname}')
 
