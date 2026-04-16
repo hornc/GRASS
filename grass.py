@@ -36,6 +36,24 @@ comment: "*" /.+/
 """
 
 
+class Picture:
+    def __init__(self):
+        self.points = []
+
+    def get_point(self, n):
+        k = 0
+        if n == len(self.points):
+            k = -1
+        return self.points[n] + [k]
+
+    def from_file(self, fname):
+        # load points from file
+        with open(fname.strip(), 'r') as f:
+            for row in f:
+                x, y, z = [int(v) for v in row.strip().split(',')]
+                self.points.append([x, y, z])
+
+
 def run_command(t):
     label, cmd, a, b = t.children
     assert cmd.data == 'command'
@@ -55,6 +73,9 @@ def run_command(t):
             mod = cmd.children[1].children[0]
             arg = cmd.children[2].children[0]
             print('GETDSK', mod, arg)
+            p = Picture()
+            p.from_file(arg)
+            print('POINTS:', p.points)
         else:
             print(f'  CMD: {cmdname}')
 
