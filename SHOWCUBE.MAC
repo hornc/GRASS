@@ -1,0 +1,4 @@
+*            *Test display, scale + move of a simple picture
+GETDSK CUBE  *GET POINTS AND DISPLAY IMMEDIATELY
+SCALE CUBE,D1
+MOVE CUBE,D2,D3,D4
