@@ -1,0 +1,26 @@
+*                   * Load, transform, and save out axes labels
+
+A=5                 * LABEL SCALE FACTOR
+
+*           *Y LABEL
+GETDSK YCHR
+SCALE YCHR,A
+MOVE YCHR,0,2047,0  *DEVICE is defined as either an 
+*                   *analog input device or an integer variable.
+*                   *can DEVICE be an integer or expression?
+COPY YCHR,SHIFTY
+PUTDSK SHIFTY       *unattested cmd intended to save a PICTURE back to DISK
+
+*           *X LABEL
+GETDSK XCHR
+SCALE XCHR,A
+MOVE XCHR,-2047,0,0
+COPY XCHR,SHIFTX
+PUTDSK SHIFTX
+
+*           *Z LABEL
+GETDSK ZCHR
+SCALE ZCHR,A
+MOVE ZCHR,0,0,2047
+COPY ZCHR,SHIFTZ
+PUTDSK SHIFTZ

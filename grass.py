@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
@@ -98,9 +99,11 @@ def run_command(t):
 
 def main():
     sourcefile = sys.argv[1]
+    dirpath = os.path.dirname(sourcefile)
     with open(sourcefile, 'r') as f:
         source = f.read()
-
+    if dirpath:
+        os.chdir(dirpath)
     parser = Lark(grass_grammar)
     parse_tree = parser.parse(source)
     print(parse_tree.pretty())
