@@ -1,0 +1,4 @@
+*           *Test display, scale + move of a simple picture
+GETDSK AXIS *GET POINTS AND DISPLAY IMMEDIATELY
+SCALE AXIS,D1
+MOVE AXIS,D2,D3,D4
