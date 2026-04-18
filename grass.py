@@ -16,27 +16,32 @@ https://en.wikipedia.org/wiki/GRASS_(programming_language)
 grass_grammar = """
 ?start: (line | comment | _NL)+
 
-line: [label] command [";" command]* [comment] _NL
+line: [LABEL] command [";" command]* [COMMENT] _NL
 
-label: "%" /[A-Z]+/
-command: variable "=" expression
-         | commandname[modifier] [argument ["," argument]*]
+LABEL: "%" /[A-Z]+/
+command: VARIABLE "=" expression        -> var
+         | COMMAND[MODIFIER] [arglist]  -> cmd
 
-commandname: /[A-Z]+/
-modifier: "/" /[A-Z]/
-argument: /[A-Z0-9]+/ | STRING | expression
+arglist: argument ("," argument)*
 
-pixname: /[A-Z0-9]+/
-variable: /[$A-Z]{1,2}/
+COMMAND: /[A-Z]{2,}/
+MODIFIER: "/" /[A-Z]/
+argument: VARIABLE | NUMBER | PIXNAME | STRING | expression
+
+PIXNAME: /[A-Z0-9]{3,}/
+VARIABLE: /[$A-Z]{1,2}/
 expression: /.+/
 
-comment: "*" /.+/
+comment: COMMENT
+
+COMMENT: "*" /.+/
 
 %import common.WS
 %import common.NUMBER
 %import common.ESCAPED_STRING -> STRING
 %import common.NEWLINE -> _NL
 %ignore WS
+%ignore COMMENT
 """
 
 
@@ -74,37 +79,50 @@ class Picture:
         plt.show()
 
 
-def run_command(t):
-    label, cmd, a, b = t.children
-    assert cmd.data == 'command'
-    cmd_type = cmd.children[0]
-    if cmd_type.data == 'variable':
-        var, expr = cmd.children
-        print(f'  VAR: {var.children[0]} = {expr.children[0]}')
-    elif cmd_type.data == 'commandname':
-        cmdname = cmd.children[0].children[0]
-        arg = cmd.children[2].children[0]
-        # print('DEBUG', cmd.children)
-        if cmdname.startswith('PROM'):
-            print(arg.strip('" '))
-        elif cmdname.startswith('INP'):
-            v = input('?')
-        elif cmdname == 'GETDSK':
-            mod = cmd.children[1]
-            if mod:
-                # /P means do not display yet, just load points
-                mod = mod.children[0]
-            arg = cmd.children[2].children[0]
-            print('GETDSK', mod, arg)
-            p = Picture()
-            p.from_file(arg)
-            print('POINTS:', p.points)
-            p.show()
-        elif cmdname == 'PUTDSK':
-            arg = cmd.children[2].children[0]
-            #p.show()
-        else:
-            print(f'  CMD: {cmdname}')
+class GrassEnv:
+    def __init__(self, macro=None):
+        self.main = macro
+        self.pictures = {}
+        self.variables = {}
+        self.inputs = {}
+        self.outputs = {}
+
+    def run(self):
+        for line in self.main.children:
+            if line.data != 'comment':
+                self.run_command(line)
+
+    def run_command(self, line):
+        label, cmd, next_cmd, _ = line.children
+        if cmd.data == 'var':
+            var, expr = cmd.children
+            print(f'  VAR: {var} = {expr.children[0]}')
+        elif cmd.data == 'cmd':
+            cmdname, mod, args = cmd.children
+            args = args.children[0].children
+            if cmdname.startswith('PROM'):
+                print(args[0].strip('" '))
+            elif cmdname.startswith('INP'):
+                v = input('?')
+            elif cmdname == 'GETDSK':
+                # mod = /P means do not display yet, just load points
+                if mod:
+                    print(f'  GETDSK mod: {mod}')
+                arg = args[0]
+                print('GETDSK', mod, arg)
+                p = Picture()
+                p.from_file(arg)
+                self.pictures[p.name] = p
+                print('POINTS:', p.points)
+                p.show()
+            elif cmdname == 'PUTDSK':
+                arg = args[0]
+                p = self.pictures.get(arg)
+                print(f'Trying to save {arg}...{p}')
+                if p:
+                    p.show()
+            else:
+                print(f'  Unimplmented CMD: {cmdname}')
 
 
 def main():
@@ -117,10 +135,8 @@ def main():
     parser = Lark(grass_grammar)
     parse_tree = parser.parse(source)
     print(parse_tree.pretty())
-
-    for command in parse_tree.children:
-        if command.data != 'comment':
-            run_command(command)
+    env = GrassEnv(parse_tree)
+    env.run()
 
 
 if __name__ == '__main__':
