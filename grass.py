@@ -43,12 +43,19 @@ comment: "*" /.+/
 class Picture:
     def __init__(self):
         self.points = []
+        self.scale = [1, 1, 1]  # x, y, z scale factors
+        self.move = [0, 0, 0]
 
     def get_point(self, n):
         k = 0
         if n == len(self.points):
             k = -1
         return self.points[n] + [k]
+
+    def get_points(self):
+        sx, sy, sz = self.scale
+        mx, my, mz = self.move
+        return [[x*sx, y*sy, z*sz] for x, y, z in self.points]
 
     def from_file(self, fname):
         # load points from file
@@ -60,7 +67,7 @@ class Picture:
 
     def show(self):
         ax = plt.figure().add_subplot(projection='3d')
-        x, y, z = zip(*self.points)
+        x, y, z = zip(*self.get_points())
         ax.plot(x, z, y, label=self.name)
         ax.set(xlabel='X', ylabel='Z', zlabel='Y')
         ax.legend()
@@ -93,6 +100,9 @@ def run_command(t):
             p.from_file(arg)
             print('POINTS:', p.points)
             p.show()
+        elif cmdname == 'PUTDSK':
+            arg = cmd.children[2].children[0]
+            #p.show()
         else:
             print(f'  CMD: {cmdname}')
 
