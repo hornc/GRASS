@@ -46,10 +46,17 @@ COMMENT: "*" /.+/
 
 
 class Picture:
-    def __init__(self):
+    def __init__(self, name=None):
+        self.name = name
         self.points = []
         self.scale = [1, 1, 1]  # x, y, z scale factors
         self.move = [0, 0, 0]
+
+    def copy(self, copyname):
+        # returns a transformed copy of self
+        c = Picture(copyname)
+        c.points = self.get_points()
+        return c
 
     def get_point(self, n):
         k = 0
@@ -99,11 +106,17 @@ class GrassEnv:
             print(f'  VAR: {var} = {expr.children[0]}')
         elif cmd.data == 'cmd':
             cmdname, mod, args = cmd.children
-            args = args.children[0].children
+            args = [a.children[0] for a in args.children]
             if cmdname.startswith('PROM'):
                 print(args[0].strip('" '))
             elif cmdname.startswith('INP'):
                 v = input('?')
+            elif cmdname == 'COPY':
+                src, dst = args
+                print(f' COPY {src} to {dst}')
+                orig = self.pictures.get(src)
+                if orig:
+                    self.pictures[dst] = orig.copy(dst)
             elif cmdname == 'GETDSK':
                 # mod = /P means do not display yet, just load points
                 if mod:
