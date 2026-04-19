@@ -95,6 +95,7 @@ class Picture:
         x, y, z = zip(*self.get_points())
         ax.plot(x, z, y, label=self.name)
         ax.set(xlabel='X', ylabel='Z', zlabel='Y')
+        ax.yaxis.set_inverted(True)
         ax.legend()
         plt.show()
 
