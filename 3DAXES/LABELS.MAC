@@ -1,6 +1,7 @@
 *                   * Load, transform, and save out axes labels
 
-A=5                 * LABEL SCALE FACTOR
+* LABEL SCALE FACTOR
+A=5
 
 *           *Y LABEL
 GETDSK YCHR

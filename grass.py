@@ -18,21 +18,28 @@ grass_grammar = """
 
 line: [LABEL] command [";" command]* [COMMENT] _NL
 
-LABEL: "%" /[A-Z]+/
-command: VARIABLE "=" expression        -> var
-         | COMMAND[MODIFIER] [arglist]  -> cmd
+command: VARIABLE "=" expression       -> var
+         | COMMAND[MODIFIER] [arglist] -> cmd
 
 arglist: argument ("," argument)*
 
+argument: VARIABLE | DIAL | NUMBER | PIXNAME | STRING | expression
+expression: NUMBER | /.+/
+comment: COMMENT
+
 COMMAND: /[A-Z]{2,}/
 MODIFIER: "/" /[A-Z]/
-argument: VARIABLE | NUMBER | PIXNAME | STRING | expression
+
+LABEL: "%" /[A-Z]+/
 
 PIXNAME: /[A-Z0-9]{3,}/
 VARIABLE: /[$A-Z]{1,2}/
-expression: /.+/
-
-comment: COMMENT
+VAR_STRING: /$[A-Z]/
+VAR_FIXED: /[VW]?[A-Z]/
+VAR_FLOAT: /F[A-Z]/
+DIAL: /D[0-9]/
+SLIDE: /S[0-9]/
+JOYSTICK: /[JK][XYX]/
 
 COMMENT: "*" /.+/
 
@@ -77,6 +84,12 @@ class Picture:
                 x, y, z = [int(v) for v in row.strip().split(',')]
                 self.points.append([x, y, z])
 
+    def save(self):
+        print(f'Trying to save {self.name}...{self}')
+        with open(self.name, 'w') as f:
+            for row in self.points:
+                f.write(', '.join([str(v) for v in row]) + '\n')
+
     def show(self):
         ax = plt.figure().add_subplot(projection='3d')
         x, y, z = zip(*self.get_points())
@@ -103,7 +116,9 @@ class GrassEnv:
         label, cmd, next_cmd, _ = line.children
         if cmd.data == 'var':
             var, expr = cmd.children
-            print(f'  VAR: {var} = {expr.children[0]}')
+            print(f'  VAR: {var} = {expr.children}')
+            v = self.evaluate(expr)
+            self.set_var(var, v)
         elif cmd.data == 'cmd':
             cmdname, mod, args = cmd.children
             args = [a.children[0] for a in args.children]
@@ -129,13 +144,36 @@ class GrassEnv:
                 print('POINTS:', p.points)
                 p.show()
             elif cmdname == 'PUTDSK':
-                arg = args[0]
-                p = self.pictures.get(arg)
-                print(f'Trying to save {arg}...{p}')
+                p = self.pictures.get(args[0])
                 if p:
                     p.show()
+                    p.save()
+            elif cmdname == 'SCALE':
+                print('SCALE:', args)
+                pix, scale = args
+                n = 1
+                if scale.type == 'NUMBER':
+                    n = int(scale)
+                elif scale.type == 'VARIABLE':
+                    n = self.get_var(scale) or 1
+                p = self.pictures.get(pix)
+                p.scale = [n, n, n]
             else:
                 print(f'  Unimplmented CMD: {cmdname}')
+
+    def evaluate(self, expr):
+        print(f'EVAL: {expr} : {len(expr.children)} "{expr.children}"')
+        if len(expr.children) == 1 and expr.children[0].type == 'NUMBER':
+            return int(expr.children[0])
+        print(f'  EXPRESSION {expr} not yet evaluatable!')
+        return None
+
+    def get_var(self, name):
+        return self.variables.get(name)
+
+    def set_var(self, name, value):
+        self.variables[name] = value
+        return self.variables.get(name)
 
 
 def main():
