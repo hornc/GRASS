@@ -23,8 +23,8 @@ command: VARIABLE "=" expression       -> var
 
 arglist: argument ("," argument)*
 
-argument: VARIABLE | DIAL | NUMBER | PIXNAME | STRING | expression
-expression: NUMBER | /.+/
+argument: VARIABLE | DIAL | SIGNED_NUMBER | PIXNAME | STRING
+expression: SIGNED_NUMBER | /.+/
 comment: COMMENT
 
 COMMAND: /[A-Z]{2,}/
@@ -44,7 +44,7 @@ JOYSTICK: /[JK][XYX]/
 COMMENT: "*" /.+/
 
 %import common.WS
-%import common.NUMBER
+%import common.SIGNED_NUMBER
 %import common.ESCAPED_STRING -> STRING
 %import common.NEWLINE -> _NL
 %ignore WS
@@ -74,7 +74,7 @@ class Picture:
     def get_points(self):
         sx, sy, sz = self.scale
         mx, my, mz = self.move
-        return [[x*sx, y*sy, z*sz] for x, y, z in self.points]
+        return [[x*sx+mx, y*sy+my, z*sz+mz] for x, y, z in self.points]
 
     def from_file(self, fname):
         # load points from file
@@ -152,18 +152,23 @@ class GrassEnv:
                 print('SCALE:', args)
                 pix, scale = args
                 n = 1
-                if scale.type == 'NUMBER':
+                if scale.type == 'SIGNED_NUMBER':
                     n = int(scale)
                 elif scale.type == 'VARIABLE':
                     n = self.get_var(scale) or 1
                 p = self.pictures.get(pix)
                 p.scale = [n, n, n]
+            elif cmdname == 'MOVE':
+                print('MOVE: ', args)
+                pix, x, y, z = args
+                p = self.pictures.get(pix)
+                p.move = [int(v) for v in [x, y, z] if v.type == 'SIGNED_NUMBER']
             else:
                 print(f'  Unimplmented CMD: {cmdname}')
 
     def evaluate(self, expr):
         print(f'EVAL: {expr} : {len(expr.children)} "{expr.children}"')
-        if len(expr.children) == 1 and expr.children[0].type == 'NUMBER':
+        if len(expr.children) == 1 and expr.children[0].type == 'SIGNED_NUMBER':
             return int(expr.children[0])
         print(f'  EXPRESSION {expr} not yet evaluatable!')
         return None
