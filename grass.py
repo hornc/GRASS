@@ -92,7 +92,7 @@ class Picture:
         self.name = fname.strip()
         with open(self.name, 'r') as f:
             for row in f:
-                x, y, z = [int(v) for v in row.strip().split(',')]
+                x, y, z = [float(v) for v in row.strip().split(',')]
                 self.points.append([x, y, z])
 
     def save(self):
