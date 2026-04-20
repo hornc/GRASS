@@ -1,0 +1,4 @@
+*             *Test display, scale + move of a simple picture
+GETDSK 3DAXES *GET POINTS AND DISPLAY IMMEDIATELY
+SCALE 3DAXES,D1
+MOVE 3DAXES,D2,D3,D4

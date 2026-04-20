@@ -164,18 +164,14 @@ class GrassEnv:
                 elif cmdname == 'SCALE':
                     print('SCALE:', args)
                     pix, scale = args
-                    n = 1
-                    if scale.data == 'variable':
-                        n = self.get_var(scale) or 1
-                    elif scale.type == 'INT':
-                        n = int(scale)
+                    n = self.get_val(scale) or 1
                     p = self.pictures.get(pix)
                     p.scale = [n, n, n]
                 elif cmdname == 'MOVE':
                     print('MOVE: ', args)
                     pix, x, y, z = args
                     p = self.pictures.get(pix)
-                    p.move = [int(v) for v in [x, y, z] if v.type == 'INT']
+                    p.move = [self.get_val(v) for v in [x, y, z]]
                 else:
                     print(f'  Unimplmented CMD: {cmdname}')
 
@@ -186,8 +182,11 @@ class GrassEnv:
         print(f'  EXPRESSION {expr} not yet evaluatable!')
         return None
 
-    def get_var(self, name):
-        return self.variables.get(name)
+    def get_val(self, value):
+        if hasattr(value, 'data') and  value.data == 'variable':
+            return self.variables.get(value)
+        if value.type == 'INT':
+            return int(value)
 
     def set_var(self, name, value):
         self.variables[name] = value
