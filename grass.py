@@ -14,18 +14,29 @@ https://en.wikipedia.org/wiki/GRASS_(programming_language)
 
 
 grass_grammar = """
-?start: (line | comment | _NL)+
+?start: (line | COMMENT | _NL)+
 
-line: [LABEL] command [";" command]* [COMMENT] _NL
+line: [LABEL] command_sequence [COMMENT] _NL
 
-command: VARIABLE "=" expression       -> var
-         | COMMAND[MODIFIER] [arglist] -> cmd
+command_sequence: command (";" command)*
+command: VARIABLE "=" expression -> var
+       | COMMAND[MODIFIER] [arglist] -> cmd
+       | "IF" variable condition ifexpression "," command -> cond
 
 arglist: argument ("," argument)*
+argument: variable | INT | PIXNAME | STRING | LABEL
 
-argument: VARIABLE | DIAL | SIGNED_NUMBER | PIXNAME | STRING
-expression: SIGNED_NUMBER | /.+/
-comment: COMMENT
+variable: VAR_STRING | DIAL | SLIDE | VARIABLE
+
+
+expression: INT | EXPR
+ifexpression: INT | IFEXPR
+condition: "=" | "EQ" -> eq
+         | "GT"       -> gt
+         | "LT"       -> lt
+
+EXPR: /[^\n]+/x
+IFEXPR: /[^,]+/
 
 COMMAND: /[A-Z]{2,}/
 MODIFIER: "/" /[A-Z]/
@@ -43,11 +54,11 @@ JOYSTICK: /[JK][XYX]/
 
 COMMENT: "*" /.+/
 
-%import common.WS
-%import common.SIGNED_NUMBER
+%import common.WS_INLINE
+%import common.SIGNED_INT -> INT
 %import common.ESCAPED_STRING -> STRING
 %import common.NEWLINE -> _NL
-%ignore WS
+%ignore WS_INLINE
 %ignore COMMENT
 """
 
@@ -114,62 +125,63 @@ class GrassEnv:
                 self.run_command(line)
 
     def run_command(self, line):
-        label, cmd, next_cmd, _ = line.children
-        if cmd.data == 'var':
-            var, expr = cmd.children
-            print(f'  VAR: {var} = {expr.children}')
-            v = self.evaluate(expr)
-            self.set_var(var, v)
-        elif cmd.data == 'cmd':
-            cmdname, mod, args = cmd.children
-            args = [a.children[0] for a in args.children]
-            if cmdname.startswith('PROM'):
-                print(args[0].strip('" '))
-            elif cmdname.startswith('INP'):
-                v = input('?')
-            elif cmdname == 'COPY':
-                src, dst = args
-                print(f' COPY {src} to {dst}')
-                orig = self.pictures.get(src)
-                if orig:
-                    self.pictures[dst] = orig.copy(dst)
-            elif cmdname == 'GETDSK':
-                # mod = /P means do not display yet, just load points
-                if mod:
-                    print(f'  GETDSK mod: {mod}')
-                arg = args[0]
-                print('GETDSK', mod, arg)
-                p = Picture()
-                p.from_file(arg)
-                self.pictures[p.name] = p
-                print('POINTS:', p.points)
-                p.show()
-            elif cmdname == 'PUTDSK':
-                p = self.pictures.get(args[0])
-                if p:
+        label, cmds, _ = line.children
+        for cmd in cmds.children:
+            if cmd.data == 'var':
+                var, expr = cmd.children
+                print(f'  VAR: {var} = {expr.children}')
+                v = self.evaluate(expr)
+                self.set_var(var, v)
+            elif cmd.data == 'cmd':
+                cmdname, mod, args = cmd.children
+                args = [a.children[0] for a in args.children]
+                if cmdname.startswith('PROM'):
+                    print(args[0].strip('" '))
+                elif cmdname.startswith('INP'):
+                    v = input('?')
+                elif cmdname == 'COPY':
+                    src, dst = args
+                    print(f' COPY {src} to {dst}')
+                    orig = self.pictures.get(src)
+                    if orig:
+                        self.pictures[dst] = orig.copy(dst)
+                elif cmdname == 'GETDSK':
+                    # mod = /P means do not display yet, just load points
+                    if mod:
+                        print(f'  GETDSK mod: {mod}')
+                    arg = args[0]
+                    print('GETDSK', mod, arg)
+                    p = Picture()
+                    p.from_file(arg)
+                    self.pictures[p.name] = p
+                    print('POINTS:', p.points)
                     p.show()
-                    p.save()
-            elif cmdname == 'SCALE':
-                print('SCALE:', args)
-                pix, scale = args
-                n = 1
-                if scale.type == 'SIGNED_NUMBER':
-                    n = int(scale)
-                elif scale.type == 'VARIABLE':
-                    n = self.get_var(scale) or 1
-                p = self.pictures.get(pix)
-                p.scale = [n, n, n]
-            elif cmdname == 'MOVE':
-                print('MOVE: ', args)
-                pix, x, y, z = args
-                p = self.pictures.get(pix)
-                p.move = [int(v) for v in [x, y, z] if v.type == 'SIGNED_NUMBER']
-            else:
-                print(f'  Unimplmented CMD: {cmdname}')
+                elif cmdname == 'PUTDSK':
+                    p = self.pictures.get(args[0])
+                    if p:
+                        p.show()
+                        p.save()
+                elif cmdname == 'SCALE':
+                    print('SCALE:', args)
+                    pix, scale = args
+                    n = 1
+                    if scale.data == 'variable':
+                        n = self.get_var(scale) or 1
+                    elif scale.type == 'INT':
+                        n = int(scale)
+                    p = self.pictures.get(pix)
+                    p.scale = [n, n, n]
+                elif cmdname == 'MOVE':
+                    print('MOVE: ', args)
+                    pix, x, y, z = args
+                    p = self.pictures.get(pix)
+                    p.move = [int(v) for v in [x, y, z] if v.type == 'INT']
+                else:
+                    print(f'  Unimplmented CMD: {cmdname}')
 
     def evaluate(self, expr):
         print(f'EVAL: {expr} : {len(expr.children)} "{expr.children}"')
-        if len(expr.children) == 1 and expr.children[0].type == 'SIGNED_NUMBER':
+        if len(expr.children) == 1 and expr.children[0].type == 'INT':
             return int(expr.children[0])
         print(f'  EXPRESSION {expr} not yet evaluatable!')
         return None
