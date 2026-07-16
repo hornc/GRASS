@@ -24,8 +24,8 @@ BOX:    VA                      ; VECTOR ABSOLUTE INSTRUCTION
        *CH, S2                  ; CHARACTER GENERATION INSTRUCTION
        'DC1 SP'                 ; ASCII BYTES, NEGATIVE LINE FEED
                                 ; AND SPACE
-       "BO"                     ; ASCII BYTES, B AND O
-       "X" 'DC4'                ; ASCII BYTES, X AND TERMINATE
+       "Bo"                     ; ASCII BYTES, B AND O
+       "x" 'DC4'                ; ASCII BYTES, X AND TERMINATE
 ZIGZAG: LD, XR                  ; LOAD STARTING WITH X-COORD
        -2048                    ; LOAD X COORDINATE WITH HALF FS
         0, T                    ; LOAD Y COORDINATE WITH ZERO

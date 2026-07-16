@@ -131,11 +131,40 @@ LOOKUP = {
 } | REGISTERS | INTERRUPTS | CHAR_SIZE
 
 
+# VG72: TABLE A-1
+ASCII = {
+    'BS' : 0x08,
+    'HT' : 0x09,
+    'LF' : 0x0A,
+    'VT' : 0x0B,
+    'FF' : 0x0C,
+    'NL' : 0x0D,
+    'DC1': 0x11,
+    'DC2': 0x12,
+    'DC3': 0x13,
+    'DC4': 0x14,
+    'SP' : 0x20,
+}
+
+
 class VGTransformer(Transformer):
     def __init__(self, outfile, listfile=None):
         super().__init__()
         self.out = outfile
         self.list = listfile
+
+    def ascii(self, children):
+        # TODO: we want the statement to appear in the listing
+        # combine the "x" 'DC4' statement into a single word
+        print('ASCII:', children)
+        word = 0
+        for i, c in enumerate(children):
+            if c.type == 'CHAR':
+                v = ord(c)
+            else:
+                v = ASCII[str(c)]
+            word |= v << (8*(1-i))
+        return f'ASCII {word:04X}'
 
     def line(self, children):
         label = children[0]
@@ -149,7 +178,8 @@ class VGTransformer(Transformer):
     def statement(self, children):
         word = 0
         text = []
-
+        label = comment = ''
+        debug = []
         for token in children:
             if token in LOOKUP:
                 word |= LOOKUP[token]
@@ -157,12 +187,15 @@ class VGTransformer(Transformer):
                 v = int(token)
                 v -= v < 0
                 word |= (v << 4) & MASK
+            else:
+                debug.append(f'UNRECOGNISED TOKEN "{token}"')
             text.append(str(token))
 
             if isinstance(token, Token):
                 print(f'TOKEN: {token} ({token.type})')
         statement = ', '.join(text)
-        label = comment = ''
+        if debug:
+            comment = '; !!! ' + '; '.join(debug)
         return '\t'.join([f'{word:04X}', f'{word:06o}', label, statement, comment])
 
 
