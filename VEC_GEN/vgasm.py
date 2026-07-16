@@ -128,6 +128,16 @@ LOOKUP = {
     'DVXX': 0x100A,
     'DV3D': 0x100B,
     'CH'  : 0x100F,
+    # VA operation field, VG72: 3-25
+    'L' : 0x0,  # Load register
+    'D' : 0x4,  # Load, then draw vector
+    'M' : 0x8,  # Load, then move beam (no draw)
+    'DT': 0xC,  # Load, draw, terminate
+    # VA coordinate field
+    'AI': 0x0,  # Autoincrement register (AIR)
+    'X' : 0x1,  # X-coord reg (XR)
+    'Y' : 0x2,  # Y-coord reg (YR)
+    'Z' : 0x3,  # Z-coord reg (ZR)
 } | REGISTERS | INTERRUPTS | CHAR_SIZE
 
 
@@ -185,7 +195,7 @@ class VGTransformer(Transformer):
                 word |= LOOKUP[token]
             elif isinstance(token, Token) and token.type in ('INT', 'SIGNED_INT'):
                 v = int(token)
-                v -= v < 0
+                #v -= v < 0
                 word |= (v << 4) & MASK
             else:
                 debug.append(f'UNRECOGNISED TOKEN "{token}"')

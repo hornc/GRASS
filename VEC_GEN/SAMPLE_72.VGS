@@ -15,7 +15,7 @@ TRANS1:*LD, CSR                 ; LOAD BEGINNING WITH SCALE
        -511, T                  ; DYR: -1/4 OFFSET DOWN
 BOX:    VA                      ; VECTOR ABSOLUTE INSTRUCTION
        -2048, L, X              ; LOAD X COORDINATE
-       -2048, L, Y              ; LOAD Y COORDINATE AND MOVE
+       -2048, M, Y              ; LOAD Y COORDINATE AND MOVE
         2047, D, X              ; LOAD X COORDINATE AND DRAW
         2047, D, Y              ; LOAD Y COORDINATE AND DRAW
        -2048, D, X              ; LOAD X COORDINATE AND DRAW
