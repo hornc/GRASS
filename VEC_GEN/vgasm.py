@@ -19,12 +19,12 @@ vg_grammar = r"""
     statement: arg+
 
     ?arg: CNAME
-        | INDIRECT
+        | INTERRUPT
         | INT
         | SIGNED_INT
         | ascii
 
-    INDIRECT: "*"
+    INTERRUPT: "*"
 
     ascii: "'" CHAR_TOKEN "'"
         | "'" CHAR_TOKEN CHAR_TOKEN "'"
@@ -114,7 +114,7 @@ CHAR_SIZE = {
 # VG72: 3.18 Control Display Instructions
 #       3-14 to 3-35
 LOOKUP = {
-    '*'   : 0o100000,  # Indirection
+    '*'   : 0o100000,  # Interrupt P-bit
     'T'   : 0x1,       # Terminate
     'NOP' : 0x0,
     'SPC' : 0x2000,
