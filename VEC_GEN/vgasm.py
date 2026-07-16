@@ -52,6 +52,7 @@ BITS = 16
 MASK = (1 << BITS) - 1
 
 
+# VG72: 3.22, 3-17
 REGISTERS = {
     'PIR': 0x4,
     'NMR': 0x4,
@@ -80,6 +81,7 @@ REGISTERS = {
 }
 
 
+# VG72: 3.11, 3-7
 INTERRUPTS = {k: v << 7 for k, v in {
     'MED': 1<<0,
     'MEC': 1<<1,
@@ -99,6 +101,7 @@ INTERRUPTS = {k: v << 7 for k, v in {
 }.items()}
 
 
+# VG72: 3.29, 3-34
 CHAR_SIZE = {
     'S0': 0x40,
     'S1': 0x50,
@@ -108,10 +111,12 @@ CHAR_SIZE = {
 }
 
 
+# VG72: 3.18 Control Display Instructions
+#       3-14 to 3-35
 LOOKUP = {
     '*'   : 0o100000,  # Indirection
+    'T'   : 0x1,       # Terminate
     'NOP' : 0x0,
-    'T'   : 0x1,
     'SPC' : 0x2000,
     'HLT' : 0x3000,
     'LD'  : 0x4000,
