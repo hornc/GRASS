@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 import argparse
-import sys
 from lark import Lark
 
-"""
+DESC = """
 Vector General display instruction mnemonic compiler 
 """
 
@@ -35,14 +34,14 @@ vg_grammar = r"""
         | "\"" "\""
 
     CHAR: /./
-    CHAR_TOKEN: /[A-Z0-9]+/
+    CHAR_TOKEN: /[A-Z]{2}[0-9]?/
 
     COMMENT: ";" /[^\n]*/
 
     %import common.WS_INLINE
     %import common (CNAME, INT, SIGNED_INT)
     %import common.NEWLINE -> _NL
-    
+
     %ignore COMMENT
     %ignore WS_INLINE
     %ignore ","
@@ -50,7 +49,13 @@ vg_grammar = r"""
 
 
 def main():
-    sourcefile = sys.argv[1]
+    parser = argparse.ArgumentParser(description=DESC)
+    parser.add_argument('source', help='Vector General instrutions to compile')
+    parser.add_argument('-l', help='listing file name (.LST)')
+    parser.add_argument('-o', help='output file name (.BIN)')
+    args = parser.parse_args()
+
+    sourcefile = args.source
     with open(sourcefile, 'r') as f:
         source = f.read()
     parser = Lark(vg_grammar)
