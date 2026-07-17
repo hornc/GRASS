@@ -111,6 +111,14 @@ CHAR_SIZE = {
 }
 
 
+# Vector Mode, 3-20
+VM = {
+    'DSH': 0x10,
+    'DOT': 0x20,
+    'PNT': 0x30,
+}
+
+
 # VG72: 3.18 Control Display Instructions
 #       3-14 to 3-35
 LOOKUP = {
@@ -149,7 +157,7 @@ LOOKUP = {
     'X' : 0x1,  # X-coord reg (XR)
     'Y' : 0x2,  # Y-coord reg (YR)
     'Z' : 0x3,  # Z-coord reg (ZR)
-} | REGISTERS | INTERRUPTS | CHAR_SIZE
+} | REGISTERS | INTERRUPTS | VM | CHAR_SIZE
 
 
 # VG72: TABLE A-1
