@@ -116,24 +116,35 @@ CHAR_SIZE = {
 LOOKUP = {
     '*'   : 0o100000,  # Interrupt P-bit
     'T'   : 0x1,       # Terminate
+    # Control Display Instructions, 3-14
     'NOP' : 0x0,
     'SPC' : 0x2000,
     'HLT' : 0x3000,
+    # Register Change Display Instructions, 3-15
     'LD'  : 0x4000,
     'OR'  : 0x5000,
     'AN'  : 0x6000,
     'AD'  : 0x7000,
+    # Display Write Instructions, 3-19
+    'VR'  : 0x1000,
+    'VR IX': 0x1001,
+    'VR IY': 0x1002,
+    'VR IZ': 0x1003,
     'VA'  : 0x1004,
+    'VA IX': 0x1005,
+    'VA IY': 0x1006,
+    'VA IZ': 0x1007,
+    'DVXY': 0x1008,
     'DVYY': 0x1009,
     'DVXX': 0x100A,
     'DV3D': 0x100B,
     'CH'  : 0x100F,
-    # VA operation field, VG72: 3-25
+    # OF: VA operation field, VG72: 3-25
     'L' : 0x0,  # Load register
     'D' : 0x4,  # Load, then draw vector
     'M' : 0x8,  # Load, then move beam (no draw)
     'DT': 0xC,  # Load, draw, terminate
-    # VA coordinate field
+    # CF: VA coordinate field
     'AI': 0x0,  # Autoincrement register (AIR)
     'X' : 0x1,  # X-coord reg (XR)
     'Y' : 0x2,  # Y-coord reg (YR)
