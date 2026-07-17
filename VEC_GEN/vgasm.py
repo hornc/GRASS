@@ -113,9 +113,9 @@ CHAR_SIZE = {
 
 # Vector Mode, 3-20
 VM = {
-    'DSH': 0x10,
-    'DOT': 0x20,
-    'PNT': 0x30,
+    'DSH': 0x10,  # Dashed line
+    'DOT': 0x20,  # Dotted line
+    'PNT': 0x30,  # End-point
 }
 
 
