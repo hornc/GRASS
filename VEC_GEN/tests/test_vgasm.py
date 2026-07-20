@@ -17,6 +17,25 @@ def hex_list(vals):
     return [f'{v:04X}' for v in vals]   # hex out
 
 
+def test_control_display_instructions():
+    source = """
+        NOP
+        *NOP  ; NOP with P-bit set
+        SPC
+        HLT
+    """
+    expected_words = [
+        0x0000,
+        0x8000,
+        0x2000,
+        0x3000,
+    ]
+    parse_tree = parser.parse(source)
+    r = transformer.transform(parse_tree)
+    assert isinstance(r, Tree)
+    assert hex_list([v['word'] for v in r.children]) == hex_list(expected_words)
+
+
 def test_single_statement():
     """
     Single statement returns a dict.
@@ -28,32 +47,6 @@ def test_single_statement():
     r = transformer.transform(parse_tree)
     assert isinstance(r, dict)
     assert r['word'] == 0x4005
-
-
-# TODO: this is now covered in the LD param tests below...
-def test_multiple_statements():
-    """
-    Multiple statements return a Tree, with lines as children
-    """
-    source = """
-    LD, MCR                 ; LOAD MODE CONTROL
-    MS1, MED, T             ; ENABLE DISPLAY INTERRUPT
-    LD, IOR                 ; LOAD INTENSITY
-    2047, T                 ; FULL SCALE BRIGHT
-    """
-    expected = [
-            0x4005,
-            0x8081,
-            0x400C,
-            0x7FF1,
-    ]
-    parse_tree = parser.parse(source)
-    r = transformer.transform(parse_tree)
-    assert isinstance(r, Tree)
-    print('Result:', r)
-    
-    assert isinstance(r.children, list)
-    assert [v['word'] for v in r.children] == expected
 
 
 ld_cases = [
