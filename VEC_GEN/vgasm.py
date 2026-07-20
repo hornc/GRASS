@@ -121,13 +121,16 @@ VM = {
 
 # VG72: 3.18 Control Display Instructions
 #       3-14 to 3-35
-LOOKUP = {
-    '*'   : 0o100000,  # Interrupt P-bit
-    'T'   : 0x1,       # Terminate
-    # Control Display Instructions, 3-14
+
+# Control Display Instructions, 3-14
+CONTROL = {
     'NOP' : 0x0,
     'SPC' : 0x2000,
     'HLT' : 0x3000,
+}
+
+
+SINGLE = {
     # Register Change Display Instructions, 3-15
     'LD'  : 0x4000,
     'OR'  : 0x5000,
@@ -142,10 +145,20 @@ LOOKUP = {
     'VA IX': 0x1005,
     'VA IY': 0x1006,
     'VA IZ': 0x1007,
+}
+
+
+DOUBLE = {
     'DVXY': 0x1008,
     'DVYY': 0x1009,
     'DVXX': 0x100A,
-    'DV3D': 0x100B,
+}
+
+
+LOOKUP = {
+    '*'   : 0o100000,  # Interrupt P-bit
+    'T'   : 0x1,       # Terminate
+    'DV3D': 0x100B,    # TRIPLE
     'CH'  : 0x100F,
     # OF: VA operation field, VG72: 3-25
     'L' : 0x0,  # Load register
@@ -157,7 +170,7 @@ LOOKUP = {
     'X' : 0x1,  # X-coord reg (XR)
     'Y' : 0x2,  # Y-coord reg (YR)
     'Z' : 0x3,  # Z-coord reg (ZR)
-} | REGISTERS | INTERRUPTS | VM | CHAR_SIZE
+} | CONTROL | SINGLE | DOUBLE | REGISTERS | INTERRUPTS | VM | CHAR_SIZE
 
 
 # VG72: TABLE A-1
@@ -176,11 +189,18 @@ ASCII = {
 }
 
 
+# Data list contexts:
+CTX_SINGLE = 1
+CTX_DOUBLE = 2
+CTX_TRIPLE = 3
+
+
 class VGTransformer(Transformer):
-    def __init__(self, outfile, listfile=None):
+    def __init__(self, outfile=None, listfile=None):
         super().__init__()
         self.out = outfile
         self.list = listfile
+        self.context = None   # Data list context None | SINGLE | DOUBLE | TRIPLE | CHAR
 
     def ascii(self, children):
         # TODO: we want the statement to appear in the listing
@@ -198,8 +218,10 @@ class VGTransformer(Transformer):
     def line(self, children):
         label = children[0]
         statement = children[1]
+        statement['label'] = label
         # TODO: something more sensible:
-        return statement.replace('\t\t', '\t' + label + '\t')
+        statement['lst'] = statement['lst'].replace('\t\t', f'\t{label}\t')
+        return statement
 
     def label(self, children):
         return f'{children[0]}:'
@@ -209,23 +231,29 @@ class VGTransformer(Transformer):
         text = []
         label = comment = ''
         debug = []
+        pos = 0
         for token in children:
             if token in LOOKUP:
                 word |= LOOKUP[token]
             elif isinstance(token, Token) and token.type in ('INT', 'SIGNED_INT'):
                 v = int(token)
-                #v -= v < 0
-                word |= (v << 4) & MASK
+                if self.context is None:  # == SINGLE:
+                    #v -= v < 0
+                    word |= (v << 4) & MASK
+                else:  # DOUBLE or TRIPLE
+                    word |= (v << (9-pos*8))
+                    pos = 1 - pos  # alternate high / low pos to locate 7bit value
             else:
                 debug.append(f'UNRECOGNISED TOKEN "{token}"')
             text.append(str(token))
-
             if isinstance(token, Token):
                 print(f'TOKEN: {token} ({token.type})')
+        #self.set_context(word)
         statement = ', '.join(text)
         if debug:
             comment = '; !!! ' + '; '.join(debug)
-        return '\t'.join([f'{word:04X}', f'{word:06o}', label, statement, comment])
+        listing = '\t'.join([f'{word:04X}', f'{word:06o}', label, statement, comment])
+        return {'word': word, 'lst': listing}
 
 
 def main():
@@ -247,7 +275,15 @@ def main():
     print('Parse Tree:')
     print(parse_tree.pretty())
     print('=' * 72)
-    print(transformer.transform(parse_tree).pretty())
+    transform = transformer.transform(parse_tree)
+    print(transform.pretty())
+
+    # Output the listing line by line:
+    for line in transform.children:
+        if isinstance(line, str):
+            print(line)
+        else:
+            print(line.get('lst'))
 
 
 if __name__ == '__main__':
