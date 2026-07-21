@@ -27,7 +27,7 @@ BOX:    VA                      ; VECTOR ABSOLUTE INSTRUCTION
        "Bo"                     ; ASCII BYTES, B AND O
        "x" 'DC4'                ; ASCII BYTES, X AND TERMINATE
 ZIGZAG: LD, XR                  ; LOAD STARTING WITH X-COORD
-       -2048                    ; LOAD X COORDINATE WITH HALF FS
+       -1024                    ; LOAD X COORDINATE WITH HALF FS
         0, T                    ; LOAD Y COORDINATE WITH ZERO
         LD, AIR                 ; LOAD INCREMENT REGISTER
         255, T                  ; WITH 255

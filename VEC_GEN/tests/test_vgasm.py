@@ -88,7 +88,7 @@ ld_cases = [
     case('5. Load register, labelled, multi-list, negative values #2',
         """
         ZIGZAG: LD, XR                  ; LOAD STARTING WITH X-COORD
-               -2048                    ; LOAD X COORDINATE WITH HALF FS
+               -1024                    ; LOAD X COORDINATE WITH HALF FS
                 0, T                    ; LOAD Y COORDINATE WITH ZERO
         """,
         [0x4008, 0xC000, 0x0001]
