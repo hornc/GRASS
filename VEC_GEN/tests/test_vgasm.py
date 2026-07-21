@@ -117,3 +117,26 @@ def test_LD_instruction(source, expected_words):
     parse_tree = parser.parse(source)
     r = transformer.transform(parse_tree)
     assert hex_list([v['word'] for v in r.children]) == hex_list(expected_words)
+
+
+va_cases = [
+    case('VA.1. Vector Absolute Display Write Instruction, single 12bit values per data list word',
+        """
+        BOX:    VA                      ; VECTOR ABSOLUTE INSTRUCTION
+               -2048, L, X              ; LOAD X COORDINATE
+               -2048, M, Y              ; LOAD Y COORDINATE AND MOVE
+                2047, D, X              ; LOAD X COORDINATE AND DRAW
+                2047, D, Y              ; LOAD Y COORDINATE AND DRAW
+               -2048, D, X              ; LOAD X COORDINATE AND DRAW
+               -2048, DT, Y             ; LOAD Y COORDINATE, DRAW AND
+        """,
+        [0x1004, 0x8001, 0x800A, 0x7FF5, 0x7FF6, 0x8005, 0x800E]
+    ),
+]
+
+
+@pytest.mark.parametrize("source,expected_words", va_cases)
+def test_VA_instruction(source, expected_words):
+    parse_tree = parser.parse(source)
+    r = transformer.transform(parse_tree)
+    assert hex_list([v['word'] for v in r.children]) == hex_list(expected_words)
