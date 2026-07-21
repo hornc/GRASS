@@ -238,7 +238,6 @@ class VGTransformer(Transformer):
             elif isinstance(token, Token) and token.type in ('INT', 'SIGNED_INT'):
                 v = int(token)
                 if self.context is None:  # == SINGLE:
-                    #v -= v < 0
                     word |= (v << 4) & MASK
                 else:  # DOUBLE or TRIPLE
                     word |= (v << (9-pos*8))

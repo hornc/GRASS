@@ -71,21 +71,21 @@ ld_cases = [
     ),
     case('3. Load Register, with interrupt (P-bit set via *)',
         """
-        *LD, PSR                 ; LOAD PICTURE SCALE
+       *LD, PSR                 ; LOAD PICTURE SCALE
         1023, T                 ; HALF SCALE
         """,
         [0xC011, 0x3FF1]
     ),
-    case('4. Load register, labelled, multi-list, negative values, #1',
+    case('4. Load register, labelled, set P-bit, multi-list, negative values #1',
         """
         TRANS1:*LD, CSR                 ; LOAD BEGINNING WITH SCALE
                 1023                    ; CSR: HALF SCALE
                -511                     ; DXR: -1/4 OFFSET LEFT
                -511, T                  ; DYR: -1/4 OFFSET DOWN
         """,
-        [0xC013, 0x3FF0, 0x8000, 0x8001]
+        [0xC013, 0x3FF0, 0xE000, 0xE001]
     ),
-    case('5. Load register, labelled, multi-list, negative values, #2',
+    case('5. Load register, labelled, multi-list, negative values #2',
         """
         ZIGZAG: LD, XR                  ; LOAD STARTING WITH X-COORD
                -2048                    ; LOAD X COORDINATE WITH HALF FS
