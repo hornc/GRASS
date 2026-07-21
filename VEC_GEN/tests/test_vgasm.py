@@ -103,7 +103,7 @@ ld_cases = [
     case('7. Multi-list LD',
         """
         TRANS2:*LD, CSR                 ; LOAD BEGINNING WITH COORD SCALE
-                1008                    ; LOAD CSR
+                511                     ; LOAD CSR
                 1023                    ; LOAD DXR
                 1023, T                 ; LOAD DYR
         """,

@@ -43,6 +43,6 @@ ZIGZAG: LD, XR                  ; LOAD STARTING WITH X-COORD
        +255, D, -255, T         ; INCREMENT X, DRAW Y AND TERMINATE
 
 TRANS2:*LD, CSR                 ; LOAD BEGINNING WITH COORD SCALE
-        1008                    ; LOAD CSR
+        511                     ; LOAD CSR [originally 1008; assumed typo]
         1023                    ; LOAD DXR
         1023, T                 ; LOAD DYR
