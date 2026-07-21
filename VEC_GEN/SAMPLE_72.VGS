@@ -11,8 +11,8 @@ INITIAL:
         1023, T                 ; HALF SCALE
 TRANS1:*LD, CSR                 ; LOAD BEGINNING WITH SCALE
         1023                    ; CSR: HALF SCALE
-       -512                     ; DXR: -1/4 OFFSET LEFT
-       -512, T                  ; DYR: -1/4 OFFSET DOWN
+       -512                     ; DXR: -1/4 OFFSET LEFT [originally -511; assumed typo]
+       -512, T                  ; DYR: -1/4 OFFSET DOWN [originally -511; assumed typo]
 BOX:    VA                      ; VECTOR ABSOLUTE INSTRUCTION
        -2048, L, X              ; LOAD X COORDINATE
        -2048, M, Y              ; LOAD Y COORDINATE AND MOVE
@@ -27,10 +27,10 @@ BOX:    VA                      ; VECTOR ABSOLUTE INSTRUCTION
        "Bo"                     ; ASCII BYTES, B AND O
        "x" 'DC4'                ; ASCII BYTES, X AND TERMINATE
 ZIGZAG: LD, XR                  ; LOAD STARTING WITH X-COORD
-       -1024                    ; LOAD X COORDINATE WITH HALF FS
+       -1024                    ; LOAD X COORDINATE WITH HALF FS [originally -2048, assumed typo]
         0, T                    ; LOAD Y COORDINATE WITH ZERO
         LD, AIR                 ; LOAD INCREMENT REGISTER
-        255, T                  ; WITH 255
+        127, T                  ; WITH 127 [originally 255; assumed typo]
        *DVYY                    ; 2D VECTOR INCREMENTAL,
                                 ; X AUTOINCREMENT
        +255, M, +255            ; MOVE Y

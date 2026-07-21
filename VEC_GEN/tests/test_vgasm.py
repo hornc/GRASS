@@ -96,7 +96,7 @@ ld_cases = [
     case('6. Another simple LD',
         """
         LD, AIR                 ; LOAD INCREMENT REGISTER
-        255, T                  ; WITH 255
+        127, T                  ; WITH 127
         """,
         [0x400B, 0x07F1]
     ),
