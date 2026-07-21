@@ -80,8 +80,8 @@ ld_cases = [
         """
         TRANS1:*LD, CSR                 ; LOAD BEGINNING WITH SCALE
                 1023                    ; CSR: HALF SCALE
-               -511                     ; DXR: -1/4 OFFSET LEFT
-               -511, T                  ; DYR: -1/4 OFFSET DOWN
+               -512                     ; DXR: -1/4 OFFSET LEFT
+               -512, T                  ; DYR: -1/4 OFFSET DOWN
         """,
         [0xC013, 0x3FF0, 0xE000, 0xE001]
     ),
