@@ -140,3 +140,23 @@ def test_VA_instruction(source, expected_words):
     parse_tree = parser.parse(source)
     r = transformer.transform(parse_tree)
     assert hex_list([v['word'] for v in r.children]) == hex_list(expected_words)
+
+
+inc_vec_cases = [
+    case('Incremental Vectors 2D',
+        """
+        *DVYY                   ; 2D VECTOR INCREMENTAL, X AUTOINCREMENT
+        +255, M, +255           ; MOVE Y
+        +255, D, -255           ; INCREMENT X, DRAW Y
+        +255, D, -255, T        ; INCREMENT X, DRAW Y AND TERMINATE
+        """,
+        [0x9009, 0x7E7E, 0x7F82, 0x7F83]
+    ),
+]
+
+
+@pytest.mark.parametrize("source,expected_words", inc_vec_cases)
+def test_VA_instruction(source, expected_words):
+    parse_tree = parser.parse(source)
+    r = transformer.transform(parse_tree)
+    assert hex_list([v['word'] for v in r.children]) == hex_list(expected_words)
