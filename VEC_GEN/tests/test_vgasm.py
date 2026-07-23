@@ -156,7 +156,7 @@ inc_vec_cases = [
 
 
 @pytest.mark.parametrize("source,expected_words", inc_vec_cases)
-def test_VA_instruction(source, expected_words):
+def test_inc_vec_instruction(source, expected_words):
     parse_tree = parser.parse(source)
     r = transformer.transform(parse_tree)
     assert hex_list([v['word'] for v in r.children]) == hex_list(expected_words)
