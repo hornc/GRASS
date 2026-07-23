@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import argparse
+from collections import ChainMap
 from lark import Lark, Token, Transformer
+
 
 DESC = """
 Vector General display instruction mnemonic compiler 
@@ -50,6 +52,7 @@ vg_grammar = r"""
 
 BITS = 16
 MASK = (1 << BITS) - 1
+DBL_MASK = 127  # 7 bit mask
 
 
 # VG72: 3.22, 3-17
@@ -155,22 +158,46 @@ DOUBLE = {
 }
 
 
-LOOKUP = {
-    '*'   : 0o100000,  # Interrupt P-bit
-    'T'   : 0x1,       # Terminate
-    'DV3D': 0x100B,    # TRIPLE
-    'CH'  : 0x100F,
-    # OF: VA operation field, VG72: 3-25
+# Arguments for 12bit single value Display Write Data lists
+DATA_ARGS_OF_CF = {
+    # OF: VA/R operation field, VG72: 3-25
     'L' : 0x0,  # Load register
     'D' : 0x4,  # Load, then draw vector
     'M' : 0x8,  # Load, then move beam (no draw)
     'DT': 0xC,  # Load, draw, terminate
-    # CF: VA coordinate field
+    # CF: VA/R coordinate field
     'AI': 0x0,  # Autoincrement register (AIR)
     'X' : 0x1,  # X-coord reg (XR)
     'Y' : 0x2,  # Y-coord reg (YR)
     'Z' : 0x3,  # Z-coord reg (ZR)
+}
+
+
+# Increment scale, 3-29
+INST_ARG_S = {
+    'M': 0x80
+}
+
+
+# Intesity field, 3-30
+DATA_ARG_I = {
+    'M': 0x00,
+    'D': 0x100
+}
+
+
+BASE_LOOKUP = {
+    '*'   : 0o100000,  # Interrupt P-bit
+    'T'   : 0x1,       # Terminate
+    'DV3D': 0x100B,    # TRIPLE
+    'CH'  : 0x100F,
 } | CONTROL | SINGLE | DOUBLE | REGISTERS | INTERRUPTS | VM | CHAR_SIZE
+
+
+# Context dependent lookups:
+SINGLE_DATA_LOOKUP = ChainMap(BASE_LOOKUP, DATA_ARGS_OF_CF)
+DOUBLE_INST_LOOKUP = ChainMap(BASE_LOOKUP, INST_ARG_S)
+DOUBLE_DATA_LOOKUP = ChainMap(BASE_LOOKUP, DATA_ARG_I)
 
 
 # VG72: TABLE A-1
@@ -201,6 +228,7 @@ class VGTransformer(Transformer):
         self.out = outfile
         self.list = listfile
         self.context = None   # Data list context None | SINGLE | DOUBLE | TRIPLE | CHAR
+        self.lookup = SINGLE_DATA_LOOKUP
 
     def ascii(self, children):
         # TODO: we want the statement to appear in the listing
@@ -232,22 +260,33 @@ class VGTransformer(Transformer):
         label = comment = ''
         debug = []
         pos = 0
+        op = None
         for token in children:
-            if token in LOOKUP:
-                word |= LOOKUP[token]
+            if token in self.lookup:
+                word |= self.lookup[token]
+                if self.context is None and not op and token != '*':
+                    op = token
             elif isinstance(token, Token) and token.type in ('INT', 'SIGNED_INT'):
                 v = int(token)
-                if self.context is None:  # == SINGLE:
+                if self.context == CTX_SINGLE:
                     word |= (v << 4) & MASK
-                else:  # DOUBLE or TRIPLE
-                    word |= (v << (9-pos*8))
+                elif self.context is not None:  # CTX_DOUBLE or CTX_TRIPLE
+                    shift = 9 - pos * 8
+                    word |= (v << shift) & (DBL_MASK << shift)
                     pos = 1 - pos  # alternate high / low pos to locate 7bit value
             else:
                 debug.append(f'UNRECOGNISED TOKEN "{token}"')
             text.append(str(token))
+            if token in ('DT', 'T'):  # Terminals
+                self.context = None
             if isinstance(token, Token):
-                print(f'TOKEN: {token} ({token.type})')
+                print(f'TOKEN: {token} ({token.type} state: {self.context})')
         #self.set_context(word)
+        if op in SINGLE:
+            self.context = CTX_SINGLE
+        elif op in DOUBLE:
+            self.context = CTX_DOUBLE
+
         statement = ', '.join(text)
         if debug:
             comment = '; !!! ' + '; '.join(debug)

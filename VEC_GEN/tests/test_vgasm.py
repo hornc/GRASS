@@ -41,12 +41,12 @@ def test_single_statement():
     Single statement returns a dict.
     """
     source = """
-    LD, MCR                 ; LOAD MODE CONTROL
+    HLT
     """
     parse_tree = parser.parse(source)
     r = transformer.transform(parse_tree)
     assert isinstance(r, dict)
-    assert r['word'] == 0x4005
+    assert r['word'] == 0x3000
 
 
 ld_cases = [
