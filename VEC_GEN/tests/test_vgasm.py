@@ -78,18 +78,18 @@ ld_cases = [
     ),
     case('4. Load register, labelled, set P-bit, multi-list, negative values #1',
         """
-        TRANS1:*LD, CSR                 ; LOAD BEGINNING WITH SCALE
-                1023                    ; CSR: HALF SCALE
-               -512                     ; DXR: -1/4 OFFSET LEFT
-               -512, T                  ; DYR: -1/4 OFFSET DOWN
+        TRANS1:*LD, CSR         ; LOAD BEGINNING WITH SCALE
+                1023            ; CSR: HALF SCALE
+               -512             ; DXR: -1/4 OFFSET LEFT
+               -512, T          ; DYR: -1/4 OFFSET DOWN
         """,
         [0xC013, 0x3FF0, 0xE000, 0xE001]
     ),
     case('5. Load register, labelled, multi-list, negative values #2',
         """
-        ZIGZAG: LD, XR                  ; LOAD STARTING WITH X-COORD
-               -1024                    ; LOAD X COORDINATE WITH HALF FS
-                0, T                    ; LOAD Y COORDINATE WITH ZERO
+        ZIGZAG: LD, XR          ; LOAD STARTING WITH X-COORD
+               -1024            ; LOAD X COORDINATE WITH HALF FS
+                0, T            ; LOAD Y COORDINATE WITH ZERO
         """,
         [0x4008, 0xC000, 0x0001]
     ),
@@ -102,10 +102,10 @@ ld_cases = [
     ),
     case('7. Multi-list LD',
         """
-        TRANS2:*LD, CSR                 ; LOAD BEGINNING WITH COORD SCALE
-                511                     ; LOAD CSR
-                1023                    ; LOAD DXR
-                1023, T                 ; LOAD DYR
+        TRANS2:*LD, CSR         ; LOAD BEGINNING WITH COORD SCALE
+                511             ; LOAD CSR
+                1023            ; LOAD DXR
+                1023, T         ; LOAD DYR
         """,
         [0xC013, 0x1FF0, 0x3FF0, 0x3FF1]
     ),
@@ -122,13 +122,13 @@ def test_LD_instruction(source, expected_words):
 va_cases = [
     case('VA.1. Vector Absolute Display Write Instruction, single 12bit values per data list word',
         """
-        BOX:    VA                      ; VECTOR ABSOLUTE INSTRUCTION
-               -2048, L, X              ; LOAD X COORDINATE
-               -2048, M, Y              ; LOAD Y COORDINATE AND MOVE
-                2047, D, X              ; LOAD X COORDINATE AND DRAW
-                2047, D, Y              ; LOAD Y COORDINATE AND DRAW
-               -2048, D, X              ; LOAD X COORDINATE AND DRAW
-               -2048, DT, Y             ; LOAD Y COORDINATE, DRAW AND
+        BOX:    VA              ; VECTOR ABSOLUTE INSTRUCTION
+               -2048, L, X      ; LOAD X COORDINATE
+               -2048, M, Y      ; LOAD Y COORDINATE AND MOVE
+                2047, D, X      ; LOAD X COORDINATE AND DRAW
+                2047, D, Y      ; LOAD Y COORDINATE AND DRAW
+               -2048, D, X      ; LOAD X COORDINATE AND DRAW
+               -2048, DT, Y     ; LOAD Y COORDINATE, DRAW AND TERMINATE
         """,
         [0x1004, 0x8001, 0x800A, 0x7FF5, 0x7FF6, 0x8005, 0x800E]
     ),
