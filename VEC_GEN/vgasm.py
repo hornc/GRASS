@@ -194,6 +194,9 @@ BASE_LOOKUP = {
 } | CONTROL | SINGLE | DOUBLE | REGISTERS | INTERRUPTS | VM | CHAR_SIZE
 
 
+TERMINALS = ('DT', 'T')
+
+
 # Context dependent lookups:
 SINGLE_DATA_LOOKUP = ChainMap(BASE_LOOKUP, DATA_ARGS_OF_CF)
 DOUBLE_INST_LOOKUP = ChainMap(BASE_LOOKUP, INST_ARG_S)
@@ -254,6 +257,17 @@ class VGTransformer(Transformer):
     def label(self, children):
         return f'{children[0]}:'
 
+    def set_context(self, token):
+        if token in TERMINALS:
+            self.lookup = SINGLE_DATA_LOOKUP
+            self.context = None
+        elif token in SINGLE:
+            self.context = CTX_SINGLE
+            self.lookup = SINGLE_DATA_LOOKUP
+        elif token in DOUBLE:
+            self.context = CTX_DOUBLE
+            self.lookup = DOUBLE_DATA_LOOKUP
+
     def statement(self, children):
         word = 0
         text = []
@@ -277,15 +291,11 @@ class VGTransformer(Transformer):
             else:
                 debug.append(f'UNRECOGNISED TOKEN "{token}"')
             text.append(str(token))
-            if token in ('DT', 'T'):  # Terminals
-                self.context = None
+            if token in TERMINALS:
+                self.set_context(token)
             if isinstance(token, Token):
                 print(f'TOKEN: {token} ({token.type} state: {self.context})')
-        #self.set_context(word)
-        if op in SINGLE:
-            self.context = CTX_SINGLE
-        elif op in DOUBLE:
-            self.context = CTX_DOUBLE
+        self.set_context(op)
 
         statement = ', '.join(text)
         if debug:
