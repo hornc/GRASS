@@ -174,8 +174,10 @@ inc_vec_cases = [
         -20
         +63, D, -63, T
         +20
+        LD, AIR                 ; LOAD INCREMENT REGISTER
+        127, T                  ; WITH 127
         """,
-        [0x100B, 0x7E7E, 0x2800, 0x7F82, 0xD800, 0x7F83, 0x2800]
+        [0x100B, 0x7E7E, 0x2800, 0x7F82, 0xD800, 0x7F83, 0x2800, 0x400B, 0x07F1]
     ),
 
 ]

@@ -294,7 +294,7 @@ class VGTransformer(Transformer):
             else:
                 debug.append(f'UNRECOGNISED TOKEN "{token}"')
             text.append(str(token))
-            if token in TERMINALS and self.context != CTX_TRIPLE:
+            if token in TERMINALS:
                 if self.context == CTX_TRIPLE:  # one more line to process
                     self.context = CTX_TRIPLE_FINAL
                 else:
