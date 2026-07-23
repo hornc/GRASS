@@ -145,10 +145,14 @@ def test_VA_instruction(source, expected_words):
 inc_vec_cases = [
     case('Incremental Vectors 2D',
         """
+    ; Originally these values were +255 | -255 as printed
+    ; but +/-255 is 9-bit and cannot fit into the 7-bit space available.
+    ; changing to +63 | -63 produces the compiled hex/octal
+    ; and agrees with the DVYY op-code's bit-description.
         *DVYY                   ; 2D VECTOR INCREMENTAL, X AUTOINCREMENT
-        +255, M, +255           ; MOVE Y
-        +255, D, -255           ; INCREMENT X, DRAW Y
-        +255, D, -255, T        ; INCREMENT X, DRAW Y AND TERMINATE
+        +63, M, +63             ; MOVE Y
+        +63, D, -63             ; INCREMENT X, DRAW Y
+        +63, D, -63, T          ; INCREMENT X, DRAW Y AND TERMINATE
         """,
         [0x9009, 0x7E7E, 0x7F82, 0x7F83]
     ),
