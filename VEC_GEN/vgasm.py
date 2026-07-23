@@ -191,16 +191,15 @@ BASE_LOOKUP = {
     'T'   : 0x1,       # Terminate
     'DV3D': 0x100B,    # TRIPLE
     'CH'  : 0x100F,
-} | CONTROL | SINGLE | DOUBLE | REGISTERS | INTERRUPTS | VM | CHAR_SIZE
+} | CONTROL | SINGLE | DOUBLE | REGISTERS | INTERRUPTS | VM | CHAR_SIZE | INST_ARG_S
 
 
 TERMINALS = ('DT', 'T')
 
 
 # Context dependent lookups:
-SINGLE_DATA_LOOKUP = ChainMap(BASE_LOOKUP, DATA_ARGS_OF_CF)
-DOUBLE_INST_LOOKUP = ChainMap(BASE_LOOKUP, INST_ARG_S)
-DOUBLE_DATA_LOOKUP = ChainMap(BASE_LOOKUP, DATA_ARG_I)
+SINGLE_DATA_LOOKUP = ChainMap(DATA_ARGS_OF_CF, BASE_LOOKUP)
+DOUBLE_DATA_LOOKUP = ChainMap(DATA_ARG_I, BASE_LOOKUP)
 
 
 # VG72: TABLE A-1
@@ -230,8 +229,7 @@ class VGTransformer(Transformer):
         super().__init__()
         self.out = outfile
         self.list = listfile
-        self.context = None   # Data list context None | SINGLE | DOUBLE | TRIPLE | CHAR
-        self.lookup = SINGLE_DATA_LOOKUP
+        self.set_context()  # init context and lookups
 
     def ascii(self, children):
         # TODO: we want the statement to appear in the listing
@@ -257,9 +255,9 @@ class VGTransformer(Transformer):
     def label(self, children):
         return f'{children[0]}:'
 
-    def set_context(self, token):
+    def set_context(self, token='T'):
         if token in TERMINALS:
-            self.lookup = SINGLE_DATA_LOOKUP
+            self.lookup = BASE_LOOKUP
             self.context = None
         elif token in SINGLE:
             self.context = CTX_SINGLE
@@ -292,7 +290,7 @@ class VGTransformer(Transformer):
                 debug.append(f'UNRECOGNISED TOKEN "{token}"')
             text.append(str(token))
             if token in TERMINALS:
-                self.set_context(token)
+                op = token  # trigger a context change after this line
             if isinstance(token, Token):
                 print(f'TOKEN: {token} ({token.type} state: {self.context})')
         self.set_context(op)
