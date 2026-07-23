@@ -159,12 +159,25 @@ inc_vec_cases = [
     case('Incremental Vectors 2D, scaled',
         """
         DVXY, M                 ; Scale: Magnified
-        +63, M, +63             ; MOVE Y
-        +63, D, -63             ; INCREMENT X, DRAW Y
-        +63, D, -63, T          ; INCREMENT X, DRAW Y AND TERMINATE
+        +63, M, +63
+        +63, D, -63
+        +63, D, -63, T
         """,
         [0x1088, 0x7E7E, 0x7F82, 0x7F83]
     ),
+    case('Incremental Vectors 3D',
+        """
+        DV3D                    ; 3D VECTOR INCREMENTAL
+        +63, M, +63             ; X, Y
+        +20                     ; Z
+        +63, D, -63
+        -20
+        +63, D, -63, T
+        +20
+        """,
+        [0x100B, 0x7E7E, 0x2800, 0x7F82, 0xD800, 0x7F83, 0x2800]
+    ),
+
 ]
 
 

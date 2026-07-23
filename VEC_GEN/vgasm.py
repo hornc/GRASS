@@ -141,7 +141,7 @@ SINGLE = {
     'AD'  : 0x7000,
     # Display Write Instructions, 3-19
     'VR'  : 0x1000,
-    'VR IX': 0x1001,
+    'VR IX': 0x1001,  # TODO: fold these IX..IZ into modifiers + add tests
     'VR IY': 0x1002,
     'VR IZ': 0x1003,
     'VA'  : 0x1004,
@@ -155,6 +155,7 @@ DOUBLE = {
     'DVXY': 0x1008,
     'DVYY': 0x1009,
     'DVXX': 0x100A,
+    'DV3D': 0x100B,  # TRIPLE
 }
 
 
@@ -189,7 +190,6 @@ DATA_ARG_I = {
 BASE_LOOKUP = {
     '*'   : 0o100000,  # Interrupt P-bit
     'T'   : 0x1,       # Terminate
-    'DV3D': 0x100B,    # TRIPLE
     'CH'  : 0x100F,
 } | CONTROL | SINGLE | DOUBLE | REGISTERS | INTERRUPTS | VM | CHAR_SIZE | INST_ARG_S
 
@@ -219,9 +219,11 @@ ASCII = {
 
 
 # Data list contexts:
+CTX_INST   = 0
 CTX_SINGLE = 1
 CTX_DOUBLE = 2
 CTX_TRIPLE = 3
+CTX_TRIPLE_FINAL = 4
 
 
 class VGTransformer(Transformer):
@@ -263,7 +265,10 @@ class VGTransformer(Transformer):
             self.context = CTX_SINGLE
             self.lookup = SINGLE_DATA_LOOKUP
         elif token in DOUBLE:
-            self.context = CTX_DOUBLE
+            if token == 'DV3D':
+                self.context = CTX_TRIPLE
+            else:
+                self.context = CTX_DOUBLE
             self.lookup = DOUBLE_DATA_LOOKUP
 
     def statement(self, children):
@@ -289,8 +294,13 @@ class VGTransformer(Transformer):
             else:
                 debug.append(f'UNRECOGNISED TOKEN "{token}"')
             text.append(str(token))
-            if token in TERMINALS:
-                op = token  # trigger a context change after this line
+            if token in TERMINALS and self.context != CTX_TRIPLE:
+                if self.context == CTX_TRIPLE:  # one more line to process
+                    self.context = CTX_TRIPLE_FINAL
+                else:
+                    op = token  # trigger a context change after this line
+            elif self.context == CTX_TRIPLE_FINAL:
+                op = 'T'
             if isinstance(token, Token):
                 print(f'TOKEN: {token} ({token.type} state: {self.context})')
         self.set_context(op)
