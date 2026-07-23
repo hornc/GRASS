@@ -33,14 +33,14 @@ ZIGZAG: LD, XR                  ; LOAD STARTING WITH X-COORD
         127, T                  ; WITH 127 [originally 255; assumed typo]
        *DVYY                    ; 2D VECTOR INCREMENTAL,
                                 ; X AUTOINCREMENT
-       +255, M, +255            ; MOVE Y
-       +255, D, -255            ; INCREMENT X, DRAW Y
-       +255, D, -255            ; INCREMENT X, DRAW Y
-       +255, D, -255            ; INCREMENT X, DRAW Y
-       +255, D, -255            ; INCREMENT X, DRAW Y
-       +255, D, -255            ; INCREMENT X, DRAW Y
-       +255, D, -255            ; INCREMENT X, DRAW Y
-       +255, D, -255, T         ; INCREMENT X, DRAW Y AND TERMINATE
+       +63, M, +63              ; MOVE Y  [originally +255/-255; assumed typo for 7-bit field]
+       +63, D, -63              ; INCREMENT X, DRAW Y
+       +63, D, -63              ; INCREMENT X, DRAW Y
+       +63, D, -63              ; INCREMENT X, DRAW Y
+       +63, D, -63              ; INCREMENT X, DRAW Y
+       +63, D, -63              ; INCREMENT X, DRAW Y
+       +63, D, -63              ; INCREMENT X, DRAW Y
+       +63, D, -63, T           ; INCREMENT X, DRAW Y AND TERMINATE
 
 TRANS2:*LD, CSR                 ; LOAD BEGINNING WITH COORD SCALE
         511                     ; LOAD CSR [originally 1008; assumed typo]
