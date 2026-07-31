@@ -188,3 +188,17 @@ def test_inc_vec_instruction(source, expected_words):
     parse_tree = parser.parse(source)
     r = transformer.transform(parse_tree)
     assert hex_list([v['word'] for v in r.children]) == hex_list(expected_words)
+
+
+def test_ascii():
+    source = """
+       *CH, S2                  ; CHARACTER GENERATION INSTRUCTION
+       'DC1 SP'                 ; ASCII BYTES, NEGATIVE LINE FEED
+                                ; AND SPACE
+       "Bo"                     ; ASCII BYTES, B AND O
+       "x" 'DC4'                ; ASCII BYTES, X AND TERMINATE
+    """
+    expected_words = [0x906F, 0x1120, 0x426F, 0x7814]
+    parse_tree = parser.parse(source)
+    r = transformer.transform(parse_tree)
+    assert hex_list([v['word'] for v in r.children]) == hex_list(expected_words)
