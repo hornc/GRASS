@@ -126,7 +126,7 @@ def test_LD_instruction(parser, transformer, source, expected_words):
     assert hex_list([v['word'] for v in r]) == hex_list(expected_words)
 
 
-va_cases = [
+var_cases = [
     case('VA.1. Vector Absolute Display Write Instruction, single 12bit values per data list word',
         """
         BOX:    VA              ; VECTOR ABSOLUTE INSTRUCTION
@@ -167,10 +167,17 @@ va_cases = [
         """,
         [0x1007]
     ),
+    case('VR.1. Vector Relative Auto-Z Display Write Instruction',
+        """
+        VR IZ           ; VECTOR RELATIVE AUTO-Z INSTRUCTION
+                        ; .... datalist not present, but should still compile as a fragment
+        """,
+        [0x1003]
+    ),
 ]
 
 
-@pytest.mark.parametrize("source,expected_words", va_cases)
+@pytest.mark.parametrize("source,expected_words", var_cases)
 def test_VA_instruction(parser, transformer, source, expected_words):
     parse_tree = parser.parse(source)
     r = transformer.transform(parse_tree)
