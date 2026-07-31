@@ -10,7 +10,7 @@ Vector General display instruction mnemonic compiler
 
 
 vg_grammar = r"""
-    ?start: (line|_NL)+
+    start: (line|_NL)+
 
     ?line: label statement _NL
          | label _NL
@@ -141,13 +141,10 @@ SINGLE = {
     'AD'  : 0x7000,
     # Display Write Instructions, 3-19
     'VR'  : 0x1000,
-    'VR IX': 0x1001,  # TODO: fold these IX..IZ into modifiers + add tests
-    'VR IY': 0x1002,
-    'VR IZ': 0x1003,
     'VA'  : 0x1004,
-    'VA IX': 0x1005,
-    'VA IY': 0x1006,
-    'VA IZ': 0x1007,
+    'IX' : 0x01,
+    'IY' : 0x02,
+    'IZ' : 0x03,
 }
 
 
@@ -232,6 +229,14 @@ class VGTransformer(Transformer):
         self.out = outfile
         self.list = listfile
         self.set_context()  # init context and lookups
+
+    def start(self, children) -> list:
+        """
+        Transformer should always return a list of dicts:
+        {'word': 0x..., 'lst': ''}
+        """
+        statements = [c for c in children if c is not None]
+        return statements
 
     def ascii(self, children):
         # TODO: we want the statement to appear in the listing

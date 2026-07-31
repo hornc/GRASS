@@ -32,21 +32,21 @@ def test_control_display_instructions():
     ]
     parse_tree = parser.parse(source)
     r = transformer.transform(parse_tree)
-    assert isinstance(r, Tree)
-    assert hex_list([v['word'] for v in r.children]) == hex_list(expected_words)
+    assert isinstance(r, list)
+    assert hex_list([v['word'] for v in r]) == hex_list(expected_words)
 
 
 def test_single_statement():
     """
-    Single statement returns a dict.
+    Single statements also return a list.
     """
     source = """
     HLT
     """
     parse_tree = parser.parse(source)
     r = transformer.transform(parse_tree)
-    assert isinstance(r, dict)
-    assert r['word'] == 0x3000
+    assert isinstance(r, list)
+    assert r[0]['word'] == 0x3000
 
 
 ld_cases = [
@@ -116,7 +116,7 @@ ld_cases = [
 def test_LD_instruction(source, expected_words):
     parse_tree = parser.parse(source)
     r = transformer.transform(parse_tree)
-    assert hex_list([v['word'] for v in r.children]) == hex_list(expected_words)
+    assert hex_list([v['word'] for v in r]) == hex_list(expected_words)
 
 
 va_cases = [
@@ -132,14 +132,43 @@ va_cases = [
         """,
         [0x1004, 0x8001, 0x800A, 0x7FF5, 0x7FF6, 0x8005, 0x800E]
     ),
+    case('VA.2. Vector Absolute Auto-X Display Write Instruction',
+        """
+        LD, AIR         ; LOAD INCREMENT REGISTER
+        50, T           ; WITH 50
+        VA IX           ; VECTOR ABSOLUTE AUTO-X INSTRUCTION, syntax un-attested in examples, but documented as 'VA IX'
+       -2048, L, X      ; LOAD X COORDINATE
+       -2048, M, Y      ; LOAD Y COORDINATE AND MOVE
+        2047, D, X      ; LOAD X COORDINATE AND DRAW
+        2047, D, Y      ; LOAD Y COORDINATE AND DRAW
+       -2048, D, X      ; LOAD X COORDINATE AND DRAW
+       -2048, DT, Y     ; LOAD Y COORDINATE, DRAW AND TERMINATE
+        """,
+        [0x400B, 0x0321, 0x1005, 0x8001, 0x800A, 0x7FF5, 0x7FF6, 0x8005, 0x800E]
+    ),
+    case('VA.3. Vector Absolute Auto-Y Display Write Instruction',
+        """
+        VA IY           ; VECTOR ABSOLUTE AUTO-Y INSTRUCTION
+                        ; .... datalist not present, but should still compile as a fragment
+        """,
+        [0x1006]
+    ),
+    case('VA.4. Vector Absolute Auto-Z Display Write Instruction',
+        """
+        VA IZ           ; VECTOR ABSOLUTE AUTO-Z INSTRUCTION
+                        ; .... datalist not present, but should still compile as a fragment
+        """,
+        [0x1007]
+    ),
 ]
 
 
 @pytest.mark.parametrize("source,expected_words", va_cases)
 def test_VA_instruction(source, expected_words):
     parse_tree = parser.parse(source)
-    r = transformer.transform(parse_tree)
-    assert hex_list([v['word'] for v in r.children]) == hex_list(expected_words)
+    fragment_transformer = VGTransformer()
+    r = fragment_transformer.transform(parse_tree)
+    assert hex_list([v['word'] for v in r]) == hex_list(expected_words)
 
 
 inc_vec_cases = [
@@ -187,7 +216,7 @@ inc_vec_cases = [
 def test_inc_vec_instruction(source, expected_words):
     parse_tree = parser.parse(source)
     r = transformer.transform(parse_tree)
-    assert hex_list([v['word'] for v in r.children]) == hex_list(expected_words)
+    assert hex_list([v['word'] for v in r]) == hex_list(expected_words)
 
 
 def test_ascii():
@@ -201,4 +230,4 @@ def test_ascii():
     expected_words = [0x906F, 0x1120, 0x426F, 0x7814]
     parse_tree = parser.parse(source)
     r = transformer.transform(parse_tree)
-    assert hex_list([v['word'] for v in r.children]) == hex_list(expected_words)
+    assert hex_list([v['word'] for v in r]) == hex_list(expected_words)
