@@ -1,5 +1,5 @@
 # GRASS
-![Tests](https://github.com/hornc/GRASS/actions/workflows/test.yml/badge.svg)
+[![Tests](https://github.com/hornc/GRASS/actions/workflows/test.yml/badge.svg)](https://github.com/hornc/GRASS/actions/workflows/test.yml)
 
 [Tom Defanti](https://en.wikipedia.org/wiki/Thomas_A._DeFanti)'s "real time computer language" "Grass" (1974)
 
@@ -23,9 +23,16 @@ A BASIC style language used for 2D vector animation.
 `.MAC` = 'macro'
 
 #### Vector General
+This project includes a [Vector General assembler](VEC_GEN) to compile Vector General style op-codes to binary for the shared DMA expected by the displays.
+This _might_ be a first step towards creating a display emulator.
+
+I believe GRASS used compiled Vector General drawing instructions for its on-disk PICTURE objects. Discovering the format of these was the main purpose of the assembler.
+_All_ of the original GRASS worked by forming Vector General instructions, so there is a path towards re-implementing every GRASS operation in terms of Vector General shared DMA, rather than just simulating it at a higher level, which is where I started with my Python code, and what ZGRASS did with its raster graphics implementation.
+
 PDP-11/45  with [Vector General](https://en.wikipedia.org/wiki/Vector_General) 3DR display scope:
 * https://archive.org/details/bitsavers_vectorGenephicsDisplaySystemReferenceManualJan72_6676862
 * https://archive.org/details/designmanualforv00thor
 * https://archive.org/details/usersmanualforve00thorpdf
 
-
+___
+c.horn 2026
