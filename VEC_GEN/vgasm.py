@@ -236,15 +236,15 @@ class VGTransformer(Transformer):
     def ascii(self, children):
         # TODO: we want the statement to appear in the listing
         # combine the "x" 'DC4' statement into a single word
-        print('ASCII:', children)
-        word = 0
+        chars = []
         for i, c in enumerate(children):
             if c.type == 'CHAR':
-                v = ord(c)
+                chars.append(ord(c))
             else:
-                v = ASCII[str(c)]
-            word |= v << (8*(1-i))
-        return f'ASCII {word:04X}'
+                chars.append(ASCII[str(c)])
+        if len(chars) == 1:
+            return chars[0]
+        return chars
 
     def line(self, children):
         label = children[0]
@@ -278,8 +278,14 @@ class VGTransformer(Transformer):
         debug = []
         pos = 0
         op = None
+        if isinstance(children[0], list):  # unpack muli-char ASCII
+            children = children[0]
         for token in children:
-            if token in self.lookup:
+            if isinstance(token, int):  # ASCII byte values
+                shift = (1 - pos) * 8
+                word |= token << shift
+                pos = 1 - pos
+            elif token in self.lookup:
                 word |= self.lookup[token]
                 if self.context is None and not op and token != '*':
                     op = token
