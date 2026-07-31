@@ -1,4 +1,5 @@
 # GRASS
+![Tests](https://github.com/hornc/GRASS/actions/workflows/test.yml/badge.svg)
 
 [Tom Defanti](https://en.wikipedia.org/wiki/Thomas_A._DeFanti)'s "real time computer language" "Grass" (1974)
 
