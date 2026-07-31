@@ -1,13 +1,19 @@
-from vgasm import vg_grammar, VGTransformer
-from lark import Lark, Tree
-
 import pytest
+from vgasm import vg_grammar, VGTransformer
+from lark import Lark
 
-parser = Lark(vg_grammar)
-transformer = VGTransformer()
+
+@pytest.fixture(scope='session')
+def parser():
+    return Lark(vg_grammar)
 
 
-# Test case helper:
+@pytest.fixture
+def transformer():
+    return VGTransformer()
+
+
+# Test case helpers:
 def case(id_, *args, **kwargs):
     return pytest.param(*args, id=id_, **kwargs)
 
@@ -17,7 +23,8 @@ def hex_list(vals):
     return [f'{v:04X}' for v in vals]   # hex out
 
 
-def test_control_display_instructions():
+# Tests:
+def test_control_display_instructions(parser, transformer):
     source = """
         NOP
         *NOP  ; NOP with P-bit set
@@ -36,7 +43,7 @@ def test_control_display_instructions():
     assert hex_list([v['word'] for v in r]) == hex_list(expected_words)
 
 
-def test_single_statement():
+def test_single_statement(parser, transformer):
     """
     Single statements also return a list.
     """
@@ -113,7 +120,7 @@ ld_cases = [
 
 
 @pytest.mark.parametrize("source,expected_words", ld_cases)
-def test_LD_instruction(source, expected_words):
+def test_LD_instruction(parser, transformer, source, expected_words):
     parse_tree = parser.parse(source)
     r = transformer.transform(parse_tree)
     assert hex_list([v['word'] for v in r]) == hex_list(expected_words)
@@ -164,10 +171,9 @@ va_cases = [
 
 
 @pytest.mark.parametrize("source,expected_words", va_cases)
-def test_VA_instruction(source, expected_words):
+def test_VA_instruction(parser, transformer, source, expected_words):
     parse_tree = parser.parse(source)
-    fragment_transformer = VGTransformer()
-    r = fragment_transformer.transform(parse_tree)
+    r = transformer.transform(parse_tree)
     assert hex_list([v['word'] for v in r]) == hex_list(expected_words)
 
 
@@ -213,13 +219,13 @@ inc_vec_cases = [
 
 
 @pytest.mark.parametrize("source,expected_words", inc_vec_cases)
-def test_inc_vec_instruction(source, expected_words):
+def test_inc_vec_instruction(parser, transformer, source, expected_words):
     parse_tree = parser.parse(source)
     r = transformer.transform(parse_tree)
     assert hex_list([v['word'] for v in r]) == hex_list(expected_words)
 
 
-def test_ascii():
+def test_ascii(parser, transformer):
     source = """
        *CH, S2                  ; CHARACTER GENERATION INSTRUCTION
        'DC1 SP'                 ; ASCII BYTES, NEGATIVE LINE FEED
