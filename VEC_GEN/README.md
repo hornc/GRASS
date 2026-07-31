@@ -1,6 +1,6 @@
 # vgasm
 
-Experimental attempt to parse and compile Vector General display instructions
+Experimental attempt to parse and compile [Vector General display instructions](SAMPLE_72.VGS)
 to raw bytes for Vector General DMA.
 
 ### purpose
