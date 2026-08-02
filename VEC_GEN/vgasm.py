@@ -8,6 +8,7 @@ DESC = """
 Vector General display instruction mnemonic compiler 
 """
 
+DEBUG = False
 
 vg_grammar = r"""
     start: (line|_NL)+
@@ -260,7 +261,7 @@ class VGTransformer(Transformer):
         return statement
 
     def label(self, children):
-        return f'{children[0]}:'
+        return children[0]
 
     def set_context(self, token='T'):
         if token in TERMINALS:
@@ -312,7 +313,7 @@ class VGTransformer(Transformer):
                     op = token  # trigger a context change after this line
             elif self.context == CTX_TRIPLE_FINAL:
                 op = 'T'
-            if isinstance(token, Token):
+            if DEBUG and isinstance(token, Token):
                 print(f'TOKEN: {token} ({token.type} state: {self.context})')
         self.set_context(op)
 
@@ -337,16 +338,17 @@ def main():
         source = f.read()
     parser = Lark(vg_grammar)
     parse_tree = parser.parse(source)
-    transformer = VGTransformer(outfile, listfile)
 
-    print('Parse Tree:')
-    print(parse_tree.pretty())
-    print('=' * 72)
+    if DEBUG:
+        print('Parse Tree:\n' + '=' * 11)
+        print(parse_tree.pretty())
+
+    transformer = VGTransformer(outfile, listfile)
     transform = transformer.transform(parse_tree)
-    print(transform.pretty())
 
     # Output the listing line by line:
-    for line in transform.children:
+    print(f'\nListing of {args.source}:\n' + '=' * 30)
+    for line in transform:
         if isinstance(line, str):
             print(line)
         else:
