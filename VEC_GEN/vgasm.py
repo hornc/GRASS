@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import argparse
+import io
+import struct
 from collections import ChainMap
 from lark import Lark, Token, Transformer
 
@@ -54,6 +56,7 @@ vg_grammar = r"""
 BITS = 16
 MASK = (1 << BITS) - 1
 DBL_MASK = 127  # 7 bit mask
+WORD_FMT = struct.Struct('<H')
 
 
 # VG72: 3.22, 3-17
@@ -346,13 +349,16 @@ def main():
     transformer = VGTransformer(outfile, listfile)
     transform = transformer.transform(parse_tree)
 
-    # Output the listing line by line:
     print(f'\nListing of {args.source}:\n' + '=' * 30)
-    for line in transform:
-        if isinstance(line, str):
-            print(line)
-        else:
+    with open(outfile, 'wb') if outfile else io.BytesIO() as f:
+        for line in transform:
+            if isinstance(line, str):  # TODO: handle this better; str is a bare label
+                print(line)
+                continue
             print(line.get('lst'))
+            word = line.get('word')
+            if word is not None:
+                f.write(WORD_FMT.pack(word))
 
 
 if __name__ == '__main__':
