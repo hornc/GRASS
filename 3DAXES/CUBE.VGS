@@ -1,0 +1,24 @@
+;================
+; FULL SIZE CUBE
+;================
+
+CUBE:   VA
+       -2048, L, X              ; VECTOR ABSOLUTE
+       -2048, L, Z
+        2047, M, Y              ; MOVE TO TOP LEFT BACK CNR
+        2047, D, X              ; DRAW BACK TOP EDGE
+       -2048, D, Y
+       -2048, D, X
+        2047, D, Y              ; COMPLETE BACK FACE
+        2047, D, Z              ; DRAW TOP LEFT EDGE
+        2047, D, X              ; DRAW FRONT TOP EDGE
+       -2048, D, Y
+       -2048, D, X
+        2047, D, Y              ; COMPLETE FRONT FACE
+       -2048, M, Y
+       -2048, D, Z              ; DRAW LOWER LEFT EDGE
+        2047, M, X
+        2047, D, Z              ; DRAW LOWER RIGHT EDGE
+        2047, M, Y
+       -2048, DT, Z             ; DRAW TOP RIGHT EDGE
+                                ; AND TERMINATE

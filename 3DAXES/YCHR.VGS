@@ -1,0 +1,10 @@
+;====================
+; Drawing a 'Y' in 2D
+;====================
+
+YCHR:   DVXY                    ; INCREMENTAL VECTORS, 2D
+        1, M, 1                 ; MOVE TO TOP RIGHT
+       -2, D,-2                 ; DRAW TO LOWER LEFT
+        0, M, 2                 ; MOVE TO TOP LEFT
+       -1, D,-1, T              ; DRAW BACK TO ORIGIN
+                                ; AND TERMINATE

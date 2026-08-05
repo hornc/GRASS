@@ -1,0 +1,10 @@
+;====================
+; Drawing a 'Z' in 2D
+;====================
+
+ZCHR:   DVXY                    ; INCREMENTAL VECTORS, 2D
+       -1, M, 1
+        0, D, 2
+       -2, D,-2
+        2, D, 0
+       -1, M,-1, T
