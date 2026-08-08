@@ -63,6 +63,15 @@ COMMENT: "*" /.+/
 """
 
 
+LINESTYLE = [
+    'none',
+    'solid',
+    'dotted',
+    'dashed',
+    'dashdot',
+]
+
+
 class Picture:
     def __init__(self, name=None):
         self.name = name
@@ -104,7 +113,8 @@ class Picture:
     def show(self):
         ax = plt.figure().add_subplot(projection='3d')
         x, y, z = zip(*self.get_points())
-        ax.plot(x, z, y, label=self.name)
+        linestyle = LINESTYLE[1]
+        ax.plot(x, z, y, label=self.name, linestyle=linestyle, marker='')
         ax.set(xlabel='X', ylabel='Z', zlabel='Y')
         ax.yaxis.set_inverted(True)
         ax.legend()
