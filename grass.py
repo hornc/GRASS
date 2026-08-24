@@ -72,6 +72,19 @@ LINESTYLE = [
 ]
 
 
+def is_ascii(fname: str, chunk_size: int=1024) -> bool:
+    """Returns True if the file contains only ASCII bytes."""
+    try:
+        with open(fname, 'rb') as f:
+            chunk = f.read(chunk_size)
+            if not chunk:
+                return False
+            chunk.decode('ascii')
+            return True
+    except (UnicodeDecodeError):
+        return False
+
+
 class Picture:
     def __init__(self, name=None):
         self.name = name
@@ -99,10 +112,14 @@ class Picture:
     def from_file(self, fname):
         # load points from file
         self.name = fname.strip()
-        with open(self.name, 'r') as f:
-            for row in f:
-                x, y, z = [float(v) for v in row.strip().split(',')]
-                self.points.append([x, y, z])
+        if is_ascii(fname):
+            with open(self.name, 'r') as f:
+                for row in f:
+                    x, y, z = [float(v) for v in row.strip().split(',')]
+                    self.points.append([x, y, z])
+        else:  # Binary mode!
+            print(f'Binary data detected for {self.name}!')
+            exit(1)
 
     def save(self):
         print(f'Trying to save {self.name}...{self}')
